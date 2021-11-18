@@ -14,7 +14,7 @@ public class TabbedPane {
     JButton btn_convert = new JButton("Convert to Customer");
     JButton btn_delete = new JButton("Delete");
     JButton btn_update = new JButton("Update");
-    JComboBox cbo_electricity;
+    JComboBox<String> cbo_electricity;
     JPanel jp = new JPanel();
     JPanel crudCustomer = new JPanel();
     JPanel convertLead = new JPanel();
@@ -25,8 +25,8 @@ public class TabbedPane {
     JPanel jp_customer = new JPanel();
     JPanel jp_buttons = new JPanel();
     JTabbedPane tabbedPane = new JTabbedPane();
-    
-//    calculator
+
+    //    calculator
     JTextField txt_name_calculator = new JTextField();
     JTextField txt_email_calculator = new JTextField();
     JTextField txt_hp_calculator = new JTextField();
@@ -34,24 +34,24 @@ public class TabbedPane {
     JTextField txt_bills_calculator = new JTextField();
     JTextPane txt_info_calculator = new JTextPane();
     TitledBorder border_info = BorderFactory.createTitledBorder("Result Recomendation");
-    String electricity[] = {"2200 VA", "3500 VA", "4400 VA", "5500 VA", "6600 VA"};
+    String[] electricity = {"2200 VA", "3500 VA", "4400 VA", "5500 VA", "6600 VA"};
 
-//    lead
+    //    lead
     JTextField txt_id_lead = new JTextField();
     JTextField txt_address_lead = new JTextField();
     JTextField txt_dp_lead = new JTextField();
     JTextField txt_fp_lead = new JTextField();
-    JComboBox cb_kwp_lead = new JComboBox(new String[] {"2 KWP", "3 KWP", "4 KWP"});
-    
-//    calculator
-    JComboBox cb_id_customer = new JComboBox(new String[] {"C001", "C002", "C003"});
+    JComboBox<String> cb_kwp_lead = new JComboBox<>(new String[]{"2 KWP", "3 KWP", "4 KWP"});
+
+    //    calculator
+    JComboBox<String> cb_id_customer = new JComboBox<>(new String[]{"C001", "C002", "C003"});
     JTextField txt_email_customer = new JTextField();
     JTextField txt_hp_customer = new JTextField();
     JTextField txt_address_customer = new JTextField();
     JTextField txt_dp_customer = new JTextField();
     JTextField txt_fp_customer = new JTextField();
-    JComboBox cb_kwp_customer = new JComboBox(new String[] {"2 KWP", "3 KWP", "4 KWP"});
-    JComboBox cbStatusPayment = new JComboBox(new String[] {"Paid", "Reject", "Waiting DP", "Waiting FP"});
+    JComboBox<String> cb_kwp_customer = new JComboBox<>(new String[]{"2 KWP", "3 KWP", "4 KWP"});
+    JComboBox<String> cbStatusPayment = new JComboBox<>(new String[]{"Paid", "Reject", "Waiting DP", "Waiting FP"});
 
 
     /* Launch the application. */
@@ -76,24 +76,24 @@ public class TabbedPane {
         frm_jtpane.setLocationRelativeTo(null);
 
 //        Calculator
-        jp_buttons.setLayout(new GridLayout(0,1));
+        jp_buttons.setLayout(new GridLayout(0, 1));
         jp_buttons.add(btn_submit);
         jp_buttons.add(btn_reset);
-        cbo_electricity = new JComboBox(electricity);
-        jp.add( new JLabel(" Name"));
+        cbo_electricity = new JComboBox<>(electricity);
+        jp.add(new JLabel(" Name"));
         jp.add(txt_name_calculator);
-        jp.add( new JLabel(" Email"));
+        jp.add(new JLabel(" Email"));
         jp.add(txt_email_calculator);
-        jp.add( new JLabel(" No Handphone"));
+        jp.add(new JLabel(" No Handphone"));
         jp.add(txt_hp_calculator);
-        jp.add( new JLabel(" Area (m2)"));
+        jp.add(new JLabel(" Area (m2)"));
         jp.add(txt_area_calculator);
-        jp.add( new JLabel(" Bills per Month (Rp)"));
+        jp.add(new JLabel(" Bills per Month (Rp)"));
         jp.add(txt_bills_calculator);
-        jp.add( new JLabel(" Electricity (VA)"));
+        jp.add(new JLabel(" Electricity (VA)"));
         jp.add(cbo_electricity);
         jp.add(new JLabel());
-        jp.setLayout(new GridLayout(0,2));
+        jp.setLayout(new GridLayout(0, 2));
         jp_center.setLayout(new BorderLayout());
         txt_info_calculator.setBorder(border_info);
 
@@ -105,7 +105,7 @@ public class TabbedPane {
         jp_calculator.add(jp_east, BorderLayout.EAST);
 
 //        Leads
-        String coloumnLeads[] = {"ID", "Email", "Phone", "Status", "Recomendation", "Area", "Bills / Month", "VA"};
+        String[] coloumnLeads = {"ID", "Email", "Phone", "Status", "Recomendation", "Area", "Bills / Month", "VA"};
         Object[][] dataLeads = {
                 {"001", "afina@gmail.com", "085772610027", "New", "4 KWP", "24", "800.000", "2200"},
                 {"002", "afina@gmail.com", "085772610027", "Customer", "3 KWP", "70", "1.000.000", "2200"},
@@ -118,22 +118,14 @@ public class TabbedPane {
         tableLeads.setFillsViewportHeight(true);
         tableLeads.setEnabled(false);
 
-        jp_leads.setBorder(new EmptyBorder(10,10,0,10));
-        jp_leads.setLayout(new GridLayout(2,1));
+        jp_leads.setBorder(new EmptyBorder(10, 10, 0, 10));
+        jp_leads.setLayout(new GridLayout(2, 1));
         jp_leads.add(scrollPane);
 
         // convertLead
-        convertLead.setLayout(new GridLayout(7,2));
+        convertLead.setLayout(new GridLayout(7, 2));
         convertLead.add(new JLabel("ID"));
-        convertLead.add(txt_id_lead);
-        convertLead.add(new JLabel("Address"));
-        convertLead.add(txt_address_lead);
-        convertLead.add(new JLabel("KWP"));
-        convertLead.add(cb_kwp_lead);
-        convertLead.add(new JLabel("Down Payment (Rp)"));
-        convertLead.add(txt_dp_lead);
-        convertLead.add(new JLabel("Fullpayment (Rp)"));
-        convertLead.add(txt_fp_lead);
+        field(convertLead, txt_id_lead, txt_address_lead, cb_kwp_lead, txt_dp_lead, txt_fp_lead);
         convertLead.add(new JLabel(""));
         convertLead.add(new JLabel(""));
         convertLead.add(new JLabel(""));
@@ -143,11 +135,11 @@ public class TabbedPane {
         Border lowerdetchedLead = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
         TitledBorder borderLead = BorderFactory.createTitledBorder(lowerdetchedLead, "Convert to Customer");
         borderLead.setTitleFont(borderLead.getTitleFont().deriveFont(Font.BOLD));
-        convertLead.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder( 10, 2, 2,10), borderLead));
+        convertLead.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder(10, 2, 2, 10), borderLead));
         jp_leads.add(convertLead);
 
 //        Customer
-        String coloumnCustomer[] = {"ID", "Email", "Phone", "Address", "KWP", "Status Payment", "DP", "FP"};
+        String[] coloumnCustomer = {"ID", "Email", "Phone", "Address", "KWP", "Status Payment", "DP", "FP"};
         Object[][] dataCustomer = {
                 {"001", "afina@gmail.com", "085772610027", "Jl. Mawar 2", "4 KWP", "Paid", "500.000", "1.000.000"},
                 {"002", "afina@gmail.com", "085772610027", "Jl. Mawar 2", "4 KWP", "Reject", "500.000", "1.000.000"},
@@ -160,26 +152,18 @@ public class TabbedPane {
         tableCustomer.setFillsViewportHeight(true);
         tableCustomer.setEnabled(false);
 
-        jp_customer.setBorder(new EmptyBorder(10,10,0,10));
-        jp_customer.setLayout(new GridLayout(0,1));
+        jp_customer.setBorder(new EmptyBorder(10, 10, 0, 10));
+        jp_customer.setLayout(new GridLayout(0, 1));
         jp_customer.add(scrollPane2);
 
         // crudCustomer
-        crudCustomer.setLayout(new GridLayout(10,2));
+        crudCustomer.setLayout(new GridLayout(10, 2));
         crudCustomer.add(new JLabel("ID"));
         crudCustomer.add(cb_id_customer);
         crudCustomer.add(new JLabel("Email"));
         crudCustomer.add(txt_email_customer);
         crudCustomer.add(new JLabel("Phone"));
-        crudCustomer.add(txt_hp_customer);
-        crudCustomer.add(new JLabel("Address"));
-        crudCustomer.add(txt_address_customer);
-        crudCustomer.add(new JLabel("KWP"));
-        crudCustomer.add(cb_kwp_customer);
-        crudCustomer.add(new JLabel("Down Payment (Rp)"));
-        crudCustomer.add(txt_dp_customer);
-        crudCustomer.add(new JLabel("Fullpayment (Rp)"));
-        crudCustomer.add(txt_fp_customer);
+        field(crudCustomer, txt_hp_customer, txt_address_customer, cb_kwp_customer, txt_dp_customer, txt_fp_customer);
         crudCustomer.add(new JLabel("Status Payment"));
         crudCustomer.add(cbStatusPayment);
         crudCustomer.add(new JLabel(""));
@@ -191,14 +175,26 @@ public class TabbedPane {
         Border lowerdetchedCustomer = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
         TitledBorder borderCustomer = BorderFactory.createTitledBorder(lowerdetchedCustomer, "Update or Delete Customer");
         borderCustomer.setTitleFont(borderCustomer.getTitleFont().deriveFont(Font.BOLD));
-        crudCustomer.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder( 10, 2, 2,10), borderCustomer));
+        crudCustomer.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder(10, 2, 2, 10), borderCustomer));
         jp_customer.add(crudCustomer);
 
         tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         tabbedPane.setBounds(27, 21, 900, 600);
-        tabbedPane.addTab("Calculator",jp_calculator);
+        tabbedPane.addTab("Calculator", jp_calculator);
         tabbedPane.addTab("Leads", jp_leads);
         tabbedPane.addTab("Customer", jp_customer);
         frm_jtpane.getContentPane().add(tabbedPane);
+    }
+
+    private void field(JPanel crudCustomer, JTextField txt_hp_customer, JTextField txt_address_customer, JComboBox<String> cb_kwp_customer, JTextField txt_dp_customer, JTextField txt_fp_customer) {
+        crudCustomer.add(txt_hp_customer);
+        crudCustomer.add(new JLabel("Address"));
+        crudCustomer.add(txt_address_customer);
+        crudCustomer.add(new JLabel("KWP"));
+        crudCustomer.add(cb_kwp_customer);
+        crudCustomer.add(new JLabel("Down Payment (Rp)"));
+        crudCustomer.add(txt_dp_customer);
+        crudCustomer.add(new JLabel("Fullpayment (Rp)"));
+        crudCustomer.add(txt_fp_customer);
     }
 }
