@@ -5,18 +5,30 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.*;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class TabbedPane {
+    public static String db_name = "untarjava";
+    public static String db_user = "root";
+    public static String db_password = "";
+
     private JFrame frm_jtpane;
-    JButton btn_submit = new JButton("Submit");
-    JButton btn_reset = new JButton("Reset");
-    JButton btn_convert = new JButton("Convert to Customer");
-    JButton btn_delete = new JButton("Delete");
-    JButton btn_update = new JButton("Update");
-    JComboBox<String> cbo_electricity;
+    public static JButton btn_submit = new JButton("Submit");
+    public static JButton btn_reset = new JButton("Reset");
+    public static JButton btn_convert = new JButton("Convert to Customer");
+    public static JButton btn_delete = new JButton("Delete");
+    public static JButton btn_update = new JButton("Update");
+    public static JTable tableLeads = new JTable();
+    public static JComboBox<String> cbo_electricity;
     JPanel jp = new JPanel();
-    JPanel crudCustomer = new JPanel();
+
+    public static JPanel crudCustomer = new JPanel();
     JPanel convertLead = new JPanel();
     JPanel jp_center = new JPanel();
     JPanel jp_east = new JPanel();
@@ -25,48 +37,40 @@ public class TabbedPane {
     JPanel jp_customer = new JPanel();
     JPanel jp_buttons = new JPanel();
     JTabbedPane tabbedPane = new JTabbedPane();
-
     //    calculator
-    JTextField txt_name_calculator = new JTextField();
-    JTextField txt_email_calculator = new JTextField();
-    JTextField txt_hp_calculator = new JTextField();
-    JTextField txt_area_calculator = new JTextField();
-    JTextField txt_bills_calculator = new JTextField();
-    JTextPane txt_info_calculator = new JTextPane();
+    public static JTextField txt_name_calculator = new JTextField();
+    public static JTextField txt_email_calculator = new JTextField();
+    public static JTextField txt_hp_calculator = new JTextField();
+    public static JTextField txt_area_calculator = new JTextField();
+    public static JTextField txt_bills_calculator = new JTextField();
+    public static JTextPane txt_info_calculator = new JTextPane();
     TitledBorder border_info = BorderFactory.createTitledBorder("Result Recomendation");
-    String[] electricity = {"2200 VA", "3500 VA", "4400 VA", "5500 VA", "6600 VA"};
+    String[] electricity = {"2200", "3500", "4400", "5500", "6600"};
 
     //    lead
-    JTextField txt_id_lead = new JTextField();
-    JTextField txt_address_lead = new JTextField();
-    JTextField txt_dp_lead = new JTextField();
-    JTextField txt_fp_lead = new JTextField();
+    public static JTextField txt_id_lead = new JTextField();
+    public static JTextField txt_address_lead = new JTextField();
+    public static JTextField txt_dp_lead = new JTextField();
+    public static JTextField txt_fp_lead = new JTextField();
     JComboBox<String> cb_kwp_lead = new JComboBox<>(new String[]{"2 KWP", "3 KWP", "4 KWP"});
 
     //    calculator
     JComboBox<String> cb_id_customer = new JComboBox<>(new String[]{"C001", "C002", "C003"});
-    JTextField txt_email_customer = new JTextField();
-    JTextField txt_hp_customer = new JTextField();
-    JTextField txt_address_customer = new JTextField();
-    JTextField txt_dp_customer = new JTextField();
-    JTextField txt_fp_customer = new JTextField();
+    public static JTextField txt_email_customer = new JTextField();
+    public static JTextField txt_hp_customer = new JTextField();
+    public static JTextField txt_address_customer = new JTextField();
+    public static JTextField txt_dp_customer = new JTextField();
+    public static JTextField txt_fp_customer = new JTextField();
     JComboBox<String> cb_kwp_customer = new JComboBox<>(new String[]{"2 KWP", "3 KWP", "4 KWP"});
     JComboBox<String> cbStatusPayment = new JComboBox<>(new String[]{"Paid", "Reject", "Waiting DP", "Waiting FP"});
 
-
-    /* Launch the application. */
-    public static void main(String[] args) {
-        TabbedPane window = new TabbedPane();
-        window.frm_jtpane.setVisible(true);
-    }
-
     /* Create the application. */
-    public TabbedPane() {
+    public TabbedPane() throws SQLException {
         initialize();
     }
 
     /* Initialize the contents of the frame. */
-    private void initialize() {
+    private void initialize() throws SQLException {
         frm_jtpane = new JFrame();
         frm_jtpane.setTitle("JTabbedPane ");
         frm_jtpane.setBounds(100, 100, 1000, 700);
@@ -105,18 +109,21 @@ public class TabbedPane {
         jp_calculator.add(jp_east, BorderLayout.EAST);
 
 //        Leads
-        String[] coloumnLeads = {"ID", "Email", "Phone", "Status", "Recomendation", "Area", "Bills / Month", "VA"};
-        Object[][] dataLeads = {
-                {"001", "afina@gmail.com", "085772610027", "New", "4 KWP", "24", "800.000", "2200"},
-                {"002", "afina@gmail.com", "085772610027", "Customer", "3 KWP", "70", "1.000.000", "2200"},
-                {"003", "afina@gmail.com", "085772610027", "New", "2 KWP", "21", "500.000", "4400"},
-                {"004", "afina@gmail.com", "085772610027", "Customer", "4 KWP", "100", "2.000.000", "6600"},
-                {"005", "afina@gmail.com", "085772610027", "New", "1 KWP", "64", "500.000", "2200"},
-        };
-        JTable tableLeads = new JTable(dataLeads, coloumnLeads);
+        showLeadsdata();
+
         JScrollPane scrollPane = new JScrollPane(tableLeads);
         tableLeads.setFillsViewportHeight(true);
         tableLeads.setEnabled(false);
+        tableLeads.setCellSelectionEnabled(true);
+        tableLeads.setFocusable(false);
+        tableLeads.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                JTable target = (JTable)e.getSource();
+                int row = target.getSelectedRow(); // select a row
+                int column = target.getSelectedColumn(); // select a column
+                JOptionPane.showMessageDialog(null, tableLeads.getValueAt(row, column));
+            }
+        });
 
         jp_leads.setBorder(new EmptyBorder(10, 10, 0, 10));
         jp_leads.setLayout(new GridLayout(2, 1));
@@ -197,4 +204,158 @@ public class TabbedPane {
         crudCustomer.add(new JLabel("Fullpayment (Rp)"));
         crudCustomer.add(txt_fp_customer);
     }
+
+    /* Launch the application. */
+    public static void main(String[] args) throws SQLException {
+        TabbedPane window = new TabbedPane();
+        window.frm_jtpane.setVisible(true);
+
+        btn_submit.addActionListener(e -> {
+            String name = txt_name_calculator.getText();
+            String email = txt_email_calculator.getText();
+            String hp = txt_hp_calculator.getText();
+            String area = txt_area_calculator.getText();
+            String bills = txt_bills_calculator.getText();
+            String electricity = Objects.requireNonNull(cbo_electricity.getSelectedItem()).toString();
+            txt_info_calculator.setText("");
+            if (Objects.equals(name, "") || Objects.equals(email, "") || Objects.equals(bills, "") || Objects.equals(hp, "") || Objects.equals(area, "") || Objects.equals(electricity, "")) {
+                JOptionPane.showMessageDialog(null, "Field must not be empty", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else {
+                runQuery(
+                        "insert into leads set " +
+                                "email = '" + email + "', " +
+                                "no_hp = '" + hp + "', " +
+                                "area = '" + area + "', " +
+                                "bills_per_month = '" + bills + "', " +
+                                "va = " + electricity
+                );
+                txt_info_calculator.setText(Integer.parseInt(electricity) / 1000 + " KWP");
+                resetCalculator();
+                try {
+                    showLeadsdata();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        btn_reset.addActionListener(e -> resetCalculator());
+
+        ListSelectionModel cellSelectionModel = tableLeads.getSelectionModel();
+        cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        cellSelectionModel.addListSelectionListener(e -> {
+            String selectedData = null;
+
+            int[] selectedRow = tableLeads.getSelectedRows();
+            int[] selectedColumns = tableLeads.getSelectedColumns();
+
+            for (int k : selectedRow) {
+                for (int selectedColumn : selectedColumns) {
+                    selectedData = (String) tableLeads.getValueAt(k, selectedColumn);
+                }
+            }
+            System.out.println("Selected: " + selectedData);
+        });
+
+        btn_convert.addActionListener(e -> {
+
+            txt_id_lead.getText();
+            txt_address_lead.getText();
+        });
+    }
+
+    public static void runQuery(String query) {
+        try {
+
+            Connection con = getConnection();
+            assert con != null;
+            Statement st = con.createStatement();
+
+            st.executeUpdate(query);
+
+            con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public static Connection getConnection() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            return DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/" + db_name, db_user, db_password);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+        }
+        return null;
+    }
+
+    public static void showLeadsdata() throws SQLException {
+        String[] columnLeads = {"ID", "Email", "Phone", "Status", "Recomendation", "Area", "Bills / Month", "VA"};
+        ResultSet rs = runShowQuery(
+                "select " +
+                        "leads.id as id, " +
+                        "email, " +
+                        "no_hp, " +
+                        "master_leads_status.name as status, " +
+                        "area, " +
+                        "bills_per_month, " +
+                        "va " +
+                        "from leads " +
+                        "inner join " +
+                        "master_leads_status " +
+                        "on " +
+                        "master_leads_status.id " +
+                        "= " +
+                        "leads.status"
+        );
+        DefaultTableModel leadsModel = new DefaultTableModel(columnLeads, 0);
+        while (true) {
+            assert rs != null;
+            if (!rs.next()) break;
+            String[] listData = {
+                    rs.getString("id"),
+                    rs.getString("email"),
+                    rs.getString("no_hp"),
+                    rs.getString("status"),
+                    Integer.toString(rs.getInt("va") / 1000) + " KWP",
+                    rs.getString("area"),
+                    rs.getString("bills_per_month"),
+                    rs.getString("va"),
+            };
+
+            leadsModel.addRow(listData);
+        }
+        tableLeads.setModel(leadsModel);
+    }
+
+    public static void resetCalculator() {
+        txt_name_calculator.setText("");
+        txt_email_calculator.setText("");
+        txt_hp_calculator.setText("");
+        txt_area_calculator.setText("");
+        txt_bills_calculator.setText("");
+        cbo_electricity.setSelectedIndex(0);
+    }
+
+    public static ResultSet runShowQuery(String query) {
+        try {
+            Connection con = getConnection();
+            assert con != null;
+            PreparedStatement st = con.prepareStatement(query);
+
+            //            con.close();
+            return st.executeQuery(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+        }
+        return null;
+    }
 }
+
