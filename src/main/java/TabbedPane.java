@@ -12,9 +12,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class TabbedPane {
-    public static String db_name = "untarjava";
     public static String db_user = "root";
     public static String db_password = "";
+    public static String db_name = "untarjava";
 
     private JFrame frm_jtpane;
     public static JButton btn_submit = new JButton("Submit");
@@ -361,8 +361,7 @@ public class TabbedPane {
                 cb_status_payment.setSelectedItem(res.getString("Status Payment"));
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+            handleMysqlException(ex);
         }
     }
 
@@ -405,8 +404,7 @@ public class TabbedPane {
                 if (!rs.next()) break;
                 listData.add(rs.getString("id"));
             } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+                handleMysqlException(e);
             }
         }
         return listData;
@@ -421,7 +419,7 @@ public class TabbedPane {
                 if (!rs.next()) break;
                 listData.add(rs.getString("id"));
             } catch (SQLException e) {
-                e.printStackTrace();
+                handleMysqlException(e);
             }
         }
         return listData;
@@ -436,7 +434,7 @@ public class TabbedPane {
                 if (!rs.next()) break;
                 listData.add(rs.getString("name"));
             } catch (SQLException e) {
-                e.printStackTrace();
+                handleMysqlException(e);
             }
         }
         return listData.toArray();
@@ -481,8 +479,7 @@ public class TabbedPane {
                 customerModel.addRow(listData);
                 tableCustomer.setModel(customerModel);
             } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+                handleMysqlException(e);
             }
 
         }
