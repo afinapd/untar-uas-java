@@ -7,15 +7,14 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class TabbedPane {
     public static String db_name = "untarjava";
     public static String db_user = "root";
-    public static String db_password = "afinapd";
+    public static String db_password = "";
 
     private JFrame frm_jtpane;
     public static JButton btn_submit = new JButton("Submit");
@@ -24,6 +23,7 @@ public class TabbedPane {
     public static JButton btn_delete = new JButton("Delete");
     public static JButton btn_update = new JButton("Update");
     public static JTable tableLeads = new JTable();
+    public static JTable tableCustomer = new JTable();
     public static JComboBox<String> cbo_electricity;
     JPanel jp = new JPanel();
 
@@ -35,7 +35,7 @@ public class TabbedPane {
     JPanel jp_leads = new JPanel();
     JPanel jp_customer = new JPanel();
     JPanel jp_buttons = new JPanel();
-    JTabbedPane tabbedPane = new JTabbedPane();
+    public static JTabbedPane tabbedPane = new JTabbedPane();
     //    calculator
     public static JTextField txt_name_calculator = new JTextField();
     public static JTextField txt_email_calculator = new JTextField();
@@ -47,22 +47,34 @@ public class TabbedPane {
     String[] electricity = {"2200", "3500", "4400", "5500", "6600"};
 
     //    lead
-    JComboBox<String> cb_id_leads = new JComboBox<>(new String[]{"C001", "C002", "C003"});
-    public static JTextField txt_id_lead = new JTextField();
+    public static JComboBox<Object> cb_id_leads;
+
     public static JTextField txt_address_lead = new JTextField();
     public static JTextField txt_dp_lead = new JTextField();
     public static JTextField txt_fp_lead = new JTextField();
-    JComboBox<String> cb_kwp_lead = new JComboBox<>(new String[]{"2 KWP", "3 KWP", "4 KWP"});
+    public static JComboBox<Integer> cb_kwp_lead = new JComboBox<>(new Integer[]{2, 3, 4, 5, 6});
 
     //    calculator
-    JComboBox<String> cb_id_customer = new JComboBox<>(new String[]{"C001", "C002", "C003"});
+    public static JComboBox<Object> cb_id_customer;
+
     public static JTextField txt_email_customer = new JTextField();
     public static JTextField txt_hp_customer = new JTextField();
     public static JTextField txt_address_customer = new JTextField();
     public static JTextField txt_dp_customer = new JTextField();
     public static JTextField txt_fp_customer = new JTextField();
-    JComboBox<String> cb_kwp_customer = new JComboBox<>(new String[]{"2 KWP", "3 KWP", "4 KWP"});
-    JComboBox<String> cbStatusPayment = new JComboBox<>(new String[]{"Paid", "Reject", "Waiting DP", "Waiting FP"});
+    public static JComboBox<Integer> cb_kwp_customer = new JComboBox<>(new Integer[]{2, 3, 4, 5, 6});
+    public static JComboBox<Object> cb_status_payment;
+
+    static {
+        try {
+            cb_id_customer = new JComboBox<>(showCustomerId());
+            cb_status_payment = new JComboBox<>(showMasterStatusPayment());
+            cb_id_leads = new JComboBox<>(showLeadsId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     /* Create the application. */
     public TabbedPane() throws SQLException {
@@ -110,20 +122,13 @@ public class TabbedPane {
 
 //        Leads
         showLeadsdata();
+        showCustomerdata();
 
         JScrollPane scrollPane = new JScrollPane(tableLeads);
         tableLeads.setFillsViewportHeight(true);
         tableLeads.setEnabled(false);
         tableLeads.setCellSelectionEnabled(true);
         tableLeads.setFocusable(false);
-        tableLeads.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                JTable target = (JTable)e.getSource();
-                int row = target.getSelectedRow(); // select a row
-                int column = target.getSelectedColumn(); // select a column
-                JOptionPane.showMessageDialog(null, tableLeads.getValueAt(row, column));
-            }
-        });
 
         jp_leads.setBorder(new EmptyBorder(10, 10, 0, 10));
         jp_leads.setLayout(new GridLayout(2, 1));
@@ -155,15 +160,7 @@ public class TabbedPane {
         jp_leads.add(convertLead);
 
 //        Customer
-        String[] coloumnCustomer = {"ID", "Email", "Phone", "Address", "KWP", "Status Payment", "DP", "FP"};
-        Object[][] dataCustomer = {
-                {"001", "afina@gmail.com", "085772610027", "Jl. Mawar 2", "4 KWP", "Paid", "500.000", "1.000.000"},
-                {"002", "afina@gmail.com", "085772610027", "Jl. Mawar 2", "4 KWP", "Reject", "500.000", "1.000.000"},
-                {"003", "afina@gmail.com", "085772610027", "Jl. Mawar 2", "4 KWP", "Waiting Payment", "500.000", "1.000.000"},
-                {"004", "afina@gmail.com", "085772610027", "Jl. Mawar 2", "4 KWP", "Paid", "500.000", "1.000.000"},
-                {"005", "afina@gmail.com", "085772610027", "Jl. Mawar 2", "4 KWP", "Paid", "500.000", "1.000.000"},
-        };
-        JTable tableCustomer = new JTable(dataCustomer, coloumnCustomer);
+
         JScrollPane scrollPane2 = new JScrollPane(tableCustomer);
         tableCustomer.setFillsViewportHeight(true);
         tableCustomer.setEnabled(false);
@@ -181,7 +178,7 @@ public class TabbedPane {
         crudCustomer.add(new JLabel("Phone"));
         field(crudCustomer, txt_hp_customer, txt_address_customer, cb_kwp_customer, txt_dp_customer, txt_fp_customer);
         crudCustomer.add(new JLabel("Status Payment"));
-        crudCustomer.add(cbStatusPayment);
+        crudCustomer.add(cb_status_payment);
         crudCustomer.add(new JLabel(""));
         crudCustomer.add(new JLabel(""));
         crudCustomer.add(btn_delete);
@@ -202,7 +199,7 @@ public class TabbedPane {
         frm_jtpane.getContentPane().add(tabbedPane);
     }
 
-    private void field(JPanel crudCustomer, JTextField txt_hp_customer, JTextField txt_address_customer, JComboBox<String> cb_kwp_customer, JTextField txt_dp_customer, JTextField txt_fp_customer) {
+    private void field(JPanel crudCustomer, JTextField txt_hp_customer, JTextField txt_address_customer, JComboBox<Integer> cb_kwp_customer, JTextField txt_dp_customer, JTextField txt_fp_customer) {
         crudCustomer.add(txt_hp_customer);
         crudCustomer.add(new JLabel("Address"));
         crudCustomer.add(txt_address_customer);
@@ -240,8 +237,10 @@ public class TabbedPane {
                 );
                 txt_info_calculator.setText(Integer.parseInt(electricity) / 1000 + " KWP");
                 resetCalculator();
+                tabbedPane.setSelectedIndex(1);
                 try {
                     showLeadsdata();
+                    showLeadsId();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                     JOptionPane.showMessageDialog(null, ex.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
@@ -251,27 +250,91 @@ public class TabbedPane {
 
         btn_reset.addActionListener(e -> resetCalculator());
 
-        ListSelectionModel cellSelectionModel = tableLeads.getSelectionModel();
-        cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        cellSelectionModel.addListSelectionListener(e -> {
-            String selectedData = null;
-
-            int[] selectedRow = tableLeads.getSelectedRows();
-            int[] selectedColumns = tableLeads.getSelectedColumns();
-
-            for (int k : selectedRow) {
-                for (int selectedColumn : selectedColumns) {
-                    selectedData = (String) tableLeads.getValueAt(k, selectedColumn);
-                }
-            }
-            System.out.println("Selected: " + selectedData);
-        });
-
         btn_convert.addActionListener(e -> {
 
-            txt_id_lead.getText();
-            txt_address_lead.getText();
+            Object id = cb_id_leads.getSelectedItem();
+            String address = txt_address_lead.getText();
+            Object kwp = cb_kwp_lead.getSelectedItem();
+            int DP = Integer.parseInt(txt_dp_lead.getText());
+            int FP = Integer.parseInt(txt_fp_lead.getText());
+
+            runQuery("update leads set status = 2 where id = " + id);
+            ResultSet result = runShowQuery("select email, no_hp from leads where id = " + id);
+            try {
+                while (true) {
+                    assert result != null;
+                    if (!result.next()) break;
+
+                    runQuery("insert into customer set " +
+                            "email = '" + result.getString("email") + "'," +
+                            "phone = '" + result.getString("no_hp") + "'," +
+                            "address = '" + address + "'," +
+                            "KWP = '" + kwp + "'," +
+                            "DP = '" + DP + "'," +
+                            "FP = '" + FP + "'"
+                    );
+                }
+
+                showLeadsdata();
+                showCustomerdata();
+                tabbedPane.setSelectedIndex(2);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, ex.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        cb_id_customer.addActionListener(e -> {
+            Object id = cb_id_customer.getSelectedItem();
+            try {
+                ResultSet res = showCustomerdataByID(id);
+                while(res.next()){
+                    txt_email_customer.setText(res.getString("email"));
+                    txt_hp_customer.setText(res.getString("phone"));
+                    txt_address_customer.setText(res.getString("address"));
+                    cb_kwp_customer.setSelectedItem(res.getString("KWP"));
+                    txt_dp_customer.setText(res.getString("DP"));
+                    txt_fp_customer.setText(res.getString("FP"));
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+
+        btn_delete.addActionListener(e -> {
+            Object id = cb_id_customer.getSelectedItem();
+            runQuery("delete from customer where id = " + id);
+
+            try {
+                showCustomerdata();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        });
+
+        btn_update.addActionListener(e -> {
+            Object id = cb_id_customer.getSelectedItem();
+            String email = txt_email_customer.getText();
+            String phone = txt_hp_customer.getText();
+            String address = txt_address_customer.getText();
+            Object KWP = cb_kwp_customer.getSelectedItem();
+            String DP = txt_dp_customer.getText();
+            String FP = txt_fp_customer.getText();
+            Object statusPayment = cb_status_payment.getSelectedItem();
+
+            runQuery("update customer " +
+                    "set " +
+                    "email = '" + email + "'," +
+                    "phone = '" + phone + "'," +
+                    "address = '" + address + "'," +
+                    "KWP = '" + KWP + "'," +
+                    "DP = '" + DP + "'," +
+                    "FP = '" + FP + "'," +
+                    "status_payment_id = '" + statusPayment + "'" +
+                    "where id = " + id
+            );
         });
     }
 
@@ -304,6 +367,100 @@ public class TabbedPane {
         return null;
     }
 
+    public static Object[] showLeadsId() throws SQLException {
+        ResultSet rs = runShowQuery("select id from leads where status = 1");
+        ArrayList<String> listData = new ArrayList<>();
+        while (true) {
+            assert rs != null;
+            if (!rs.next()) break;
+            listData.add(rs.getString("id"));
+        }
+        return listData.toArray();
+    }
+
+    public static Object[] showCustomerId() throws SQLException {
+        ResultSet rs = runShowQuery("select id from customer");
+        ArrayList<String> listData = new ArrayList<>();
+        while (true) {
+            assert rs != null;
+            if (!rs.next()) break;
+            listData.add(rs.getString("id"));
+        }
+        return listData.toArray();
+    }
+
+    public static Object[] showMasterStatusPayment() throws SQLException {
+        ResultSet rs = runShowQuery("select name from master_status_payment");
+        ArrayList<String> listData = new ArrayList<>();
+        while (true) {
+            assert rs != null;
+            if (!rs.next()) break;
+            listData.add(rs.getString("name"));
+        }
+        return listData.toArray();
+    }
+
+    public static void showCustomerdata() throws SQLException {
+        String[] coloumnCustomer = {"ID", "Email", "Phone", "Address", "KWP", "Status Payment", "DP", "FP"};
+        ResultSet rs = runShowQuery(
+                "select " +
+                        "customer.id as id, " +
+                        "email, " +
+                        "phone, " +
+                        "address, " +
+                        "KWP, " +
+                        "master_status_payment.name as `Status Payment`, " +
+                        "DP, " +
+                        "FP " +
+                        "from customer " +
+                        "left join " +
+                        "master_status_payment " +
+                        "on " +
+                        "master_status_payment.id " +
+                        "= " +
+                        "customer.status_payment_id"
+        );
+        DefaultTableModel customerModel = new DefaultTableModel(coloumnCustomer, 0);
+        while (true) {
+            assert rs != null;
+            if (!rs.next()) break;
+            String[] listData = {
+                    rs.getString("id"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("address"),
+                    rs.getString("KWP"),
+                    rs.getString("Status Payment"),
+                    rs.getString("DP"),
+                    rs.getString("FP"),
+            };
+
+            customerModel.addRow(listData);
+        }
+        tableCustomer.setModel(customerModel);
+    }
+    public static ResultSet showCustomerdataByID(Object Id) throws SQLException {
+        String[] coloumnCustomer = {"ID", "Email", "Phone", "Address", "KWP", "Status Payment", "DP", "FP"};
+        return runShowQuery(
+                "select " +
+                        "email, " +
+                        "phone, " +
+                        "address, " +
+                        "KWP, " +
+                        "master_status_payment.name as `Status Payment`, " +
+                        "DP, " +
+                        "FP " +
+                        "from customer " +
+                        "left join " +
+                        "master_status_payment " +
+                        "on " +
+                        "master_status_payment.id " +
+                        "= " +
+                        "customer.status_payment_id " +
+                        "where customer.id = " + Id
+        );
+    }
+
     public static void showLeadsdata() throws SQLException {
         String[] columnLeads = {"ID", "Email", "Phone", "Status", "Recomendation", "Area", "Bills / Month", "VA"};
         ResultSet rs = runShowQuery(
@@ -332,6 +489,7 @@ public class TabbedPane {
                     rs.getString("email"),
                     rs.getString("no_hp"),
                     rs.getString("status"),
+                    Integer.parseInt(rs.getString("va")) / 1000 + " KWP",
                     rs.getString("area"),
                     rs.getString("bills_per_month"),
                     rs.getString("va"),
