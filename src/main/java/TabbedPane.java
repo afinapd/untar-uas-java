@@ -47,7 +47,7 @@ public class TabbedPane {
     String[] electricity = {"2200", "3500", "4400", "5500", "6600"};
 
     //    lead
-    public static JComboBox<Object> cb_id_leads;
+    public static JComboBox<Object> cb_id_leads = new JComboBox<>(showLeadsId().toArray());
 
     public static JTextField txt_address_lead = new JTextField();
     public static JTextField txt_dp_lead = new JTextField();
@@ -55,7 +55,7 @@ public class TabbedPane {
     public static JComboBox<Integer> cb_kwp_lead = new JComboBox<>(new Integer[]{2, 3, 4, 5, 6});
 
     //    calculator
-    public static JComboBox<Object> cb_id_customer;
+    public static JComboBox<Object> cb_id_customer = new JComboBox<>(showCustomerId().toArray());
 
     public static JTextField txt_email_customer = new JTextField();
     public static JTextField txt_hp_customer = new JTextField();
@@ -63,26 +63,15 @@ public class TabbedPane {
     public static JTextField txt_dp_customer = new JTextField();
     public static JTextField txt_fp_customer = new JTextField();
     public static JComboBox<Integer> cb_kwp_customer = new JComboBox<>(new Integer[]{2, 3, 4, 5, 6});
-    public static JComboBox<Object> cb_status_payment;
-
-    static {
-        try {
-            cb_id_customer = new JComboBox<Object>(showCustomerId().toArray());
-            cb_status_payment = new JComboBox<>(showMasterStatusPayment());
-            cb_id_leads = new JComboBox<>(showLeadsId().toArray());
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
+    public static JComboBox<Object> cb_status_payment = new JComboBox<>(showMasterStatusPayment());
 
     /* Create the application. */
-    public TabbedPane() throws SQLException {
+    public TabbedPane() {
         initialize();
     }
 
     /* Initialize the contents of the frame. */
-    private void initialize() throws SQLException {
+    private void initialize() {
         frm_jtpane = new JFrame();
         frm_jtpane.setTitle("JTabbedPane ");
         frm_jtpane.setBounds(100, 100, 1000, 700);
@@ -214,7 +203,7 @@ public class TabbedPane {
     }
 
     /* Launch the application. */
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
         TabbedPane window = new TabbedPane();
         window.frm_jtpane.setVisible(true);
 
@@ -314,79 +303,74 @@ public class TabbedPane {
     }
 
     private static void reloadLeads() {
-        try {
-            showLeadsdata();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
+        showLeadsdata();
         reloadCBLeads();
         txt_address_lead.setText("");
         cb_kwp_lead.setSelectedIndex(0);
         txt_dp_lead.setText("");
         txt_fp_lead.setText("");
     }
+
     private static void reloadCBLeads() {
-        try {
-            DefaultComboBoxModel model = new DefaultComboBoxModel(showLeadsId().toArray());
-            cb_id_leads.setModel(model);
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-        }
+        cb_id_leads.setModel(new DefaultComboBoxModel(showLeadsId().toArray()));
     }
 
     private static void reloadCBCustomer() {
-        try {
-            DefaultComboBoxModel model = new DefaultComboBoxModel(showCustomerId().toArray());
-            cb_id_customer.setModel(model);
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-        }
+        cb_id_customer.setModel(new DefaultComboBoxModel(showCustomerId().toArray()));
     }
 
     public static void reloadCustomer() {
-        try {
-            showCustomerdata();
+        showCustomerdata();
 
-            reloadCBCustomer();
+        reloadCBCustomer();
 
-            updateCBDataIdCustomer();
-            cb_id_customer.setSelectedIndex(0);
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-        }
+        updateCBDataIdCustomer();
+        cb_id_customer.setSelectedIndex(0);
     }
 
     public static void updateCBDataIdCustomer() {
-        Object id = cb_id_customer.getSelectedItem();
         try {
-            ResultSet res = showCustomerdataByID(id);
+            ResultSet res = runShowQuery(
+                    "select " +
+                            "email, " +
+                            "phone, " +
+                            "address, " +
+                            "KWP, " +
+                            "master_status_payment.name as `Status Payment`, " +
+                            "DP, " +
+                            "FP " +
+                            "from customer " +
+                            "left join " +
+                            "master_status_payment " +
+                            "on " +
+                            "master_status_payment.id " +
+                            "= " +
+                            "customer.status_payment_id " +
+                            "where customer.id = " + cb_id_customer.getSelectedItem()
+            );
+
             while (res.next()) {
                 txt_email_customer.setText(res.getString("email"));
                 txt_hp_customer.setText(res.getString("phone"));
                 txt_address_customer.setText(res.getString("address"));
-                cb_kwp_customer.setSelectedItem(res.getString("KWP"));
+                cb_kwp_customer.setSelectedItem(Integer.parseInt(res.getString("KWP")));
                 txt_dp_customer.setText(res.getString("DP"));
                 txt_fp_customer.setText(res.getString("FP"));
                 cb_status_payment.setSelectedItem(res.getString("Status Payment"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public static void runQuery(String query) {
         try {
-
             Connection con = getConnection();
             assert con != null;
             Statement st = con.createStatement();
 
             st.executeUpdate(query);
-
             con.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -407,40 +391,53 @@ public class TabbedPane {
         return null;
     }
 
-    public static ArrayList<String> showLeadsId() throws SQLException {
+    public static ArrayList<String> showLeadsId() {
         ResultSet rs = runShowQuery("select id from leads where status = 1");
         ArrayList<String> listData = new ArrayList<>();
         while (true) {
             assert rs != null;
-            if (!rs.next()) break;
-            listData.add(rs.getString("id"));
+            try {
+                if (!rs.next()) break;
+                listData.add(rs.getString("id"));
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+            }
         }
         return listData;
     }
 
-    public static ArrayList<String> showCustomerId() throws SQLException {
+    public static ArrayList<String> showCustomerId() {
         ResultSet rs = runShowQuery("select id from customer order by id");
         ArrayList<String> listData = new ArrayList<>();
         while (true) {
             assert rs != null;
-            if (!rs.next()) break;
-            listData.add(rs.getString("id"));
+            try {
+                if (!rs.next()) break;
+                listData.add(rs.getString("id"));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return listData;
     }
 
-    public static Object[] showMasterStatusPayment() throws SQLException {
+    public static Object[] showMasterStatusPayment() {
         ResultSet rs = runShowQuery("select name from master_status_payment");
         ArrayList<String> listData = new ArrayList<>();
         while (true) {
             assert rs != null;
-            if (!rs.next()) break;
-            listData.add(rs.getString("name"));
+            try {
+                if (!rs.next()) break;
+                listData.add(rs.getString("name"));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return listData.toArray();
     }
 
-    public static void showCustomerdata() throws SQLException {
+    public static void showCustomerdata() {
         String[] coloumnCustomer = {"ID", "Email", "Phone", "Address", "KWP", "Status Payment", "DP", "FP"};
         ResultSet rs = runShowQuery(
                 "select " +
@@ -458,52 +455,35 @@ public class TabbedPane {
                         "on " +
                         "master_status_payment.id " +
                         "= " +
-                        "customer.status_payment_id "+
+                        "customer.status_payment_id " +
                         "order by customer.id ASC "
         );
         DefaultTableModel customerModel = new DefaultTableModel(coloumnCustomer, 0);
         while (true) {
             assert rs != null;
-            if (!rs.next()) break;
-            String[] listData = {
-                    rs.getString("id"),
-                    rs.getString("email"),
-                    rs.getString("phone"),
-                    rs.getString("address"),
-                    rs.getString("KWP"),
-                    rs.getString("Status Payment"),
-                    rs.getString("DP"),
-                    rs.getString("FP"),
-            };
+            try {
+                if (!rs.next()) break;
+                String[] listData = {
+                        rs.getString("id"),
+                        rs.getString("email"),
+                        rs.getString("phone"),
+                        rs.getString("address"),
+                        rs.getString("KWP"),
+                        rs.getString("Status Payment"),
+                        rs.getString("DP"),
+                        rs.getString("FP"),
+                };
+                customerModel.addRow(listData);
+                tableCustomer.setModel(customerModel);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+            }
 
-            customerModel.addRow(listData);
         }
-        tableCustomer.setModel(customerModel);
     }
 
-    public static ResultSet showCustomerdataByID(Object Id) throws SQLException {
-        String[] coloumnCustomer = {"ID", "Email", "Phone", "Address", "KWP", "Status Payment", "DP", "FP"};
-        return runShowQuery(
-                "select " +
-                        "email, " +
-                        "phone, " +
-                        "address, " +
-                        "KWP, " +
-                        "master_status_payment.name as `Status Payment`, " +
-                        "DP, " +
-                        "FP " +
-                        "from customer " +
-                        "left join " +
-                        "master_status_payment " +
-                        "on " +
-                        "master_status_payment.id " +
-                        "= " +
-                        "customer.status_payment_id " +
-                        "where customer.id = " + Id
-        );
-    }
-
-    public static void showLeadsdata() throws SQLException {
+    public static void showLeadsdata() {
         String[] columnLeads = {"ID", "Email", "Phone", "Status", "Recomendation", "Area", "Bills / Month", "VA"};
         ResultSet rs = runShowQuery(
                 "select " +
@@ -526,21 +506,25 @@ public class TabbedPane {
         DefaultTableModel leadsModel = new DefaultTableModel(columnLeads, 0);
         while (true) {
             assert rs != null;
-            if (!rs.next()) break;
-            String[] listData = {
-                    rs.getString("id"),
-                    rs.getString("email"),
-                    rs.getString("no_hp"),
-                    rs.getString("status"),
-                    Integer.parseInt(rs.getString("va")) / 1000 + " KWP",
-                    rs.getString("area"),
-                    rs.getString("bills_per_month"),
-                    rs.getString("va"),
-            };
+            try {
+                if (!rs.next()) break;
+                String[] listData = {
+                        rs.getString("id"),
+                        rs.getString("email"),
+                        rs.getString("no_hp"),
+                        rs.getString("status"),
+                        Integer.parseInt(rs.getString("va")) / 1000 + " KWP",
+                        rs.getString("area"),
+                        rs.getString("bills_per_month"),
+                        rs.getString("va"),
+                };
 
-            leadsModel.addRow(listData);
+                leadsModel.addRow(listData);
+                tableLeads.setModel(leadsModel);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-        tableLeads.setModel(leadsModel);
     }
 
     public static void resetCalculator() {
@@ -558,7 +542,6 @@ public class TabbedPane {
             assert con != null;
             PreparedStatement st = con.prepareStatement(query);
 
-            //            con.close();
             return st.executeQuery(query);
         } catch (Exception e) {
             e.printStackTrace();
