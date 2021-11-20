@@ -10,13 +10,12 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.*;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class TabbedPane {
     public static String db_name = "untarjava";
     public static String db_user = "root";
-    public static String db_password = "";
+    public static String db_password = "afinapd";
 
     private JFrame frm_jtpane;
     public static JButton btn_submit = new JButton("Submit");
@@ -48,6 +47,7 @@ public class TabbedPane {
     String[] electricity = {"2200", "3500", "4400", "5500", "6600"};
 
     //    lead
+    JComboBox<String> cb_id_leads = new JComboBox<>(new String[]{"C001", "C002", "C003"});
     public static JTextField txt_id_lead = new JTextField();
     public static JTextField txt_address_lead = new JTextField();
     public static JTextField txt_dp_lead = new JTextField();
@@ -129,10 +129,19 @@ public class TabbedPane {
         jp_leads.setLayout(new GridLayout(2, 1));
         jp_leads.add(scrollPane);
 
+
         // convertLead
         convertLead.setLayout(new GridLayout(7, 2));
         convertLead.add(new JLabel("ID"));
-        field(convertLead, txt_id_lead, txt_address_lead, cb_kwp_lead, txt_dp_lead, txt_fp_lead);
+        convertLead.add(cb_id_leads);
+        convertLead.add(new JLabel("Address"));
+        convertLead.add(txt_address_lead);
+        convertLead.add(new JLabel("KWP"));
+        convertLead.add(cb_kwp_lead);
+        convertLead.add(new JLabel("Down Payment (Rp)"));
+        convertLead.add(txt_dp_lead);
+        convertLead.add(new JLabel("Fullpayment (Rp)"));
+        convertLead.add(txt_fp_lead);
         convertLead.add(new JLabel(""));
         convertLead.add(new JLabel(""));
         convertLead.add(new JLabel(""));
@@ -323,7 +332,6 @@ public class TabbedPane {
                     rs.getString("email"),
                     rs.getString("no_hp"),
                     rs.getString("status"),
-                    Integer.toString(rs.getInt("va") / 1000) + " KWP",
                     rs.getString("area"),
                     rs.getString("bills_per_month"),
                     rs.getString("va"),
