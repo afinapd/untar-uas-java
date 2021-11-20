@@ -274,6 +274,7 @@ public class TabbedPane {
         btn_delete.addActionListener(e -> {
             runQuery("delete from customer where id = " + cb_id_customer.getSelectedItem());
             reloadCustomer();
+            cb_id_customer.setSelectedIndex(0);
         });
 
         btn_update.addActionListener(e -> {
@@ -325,7 +326,6 @@ public class TabbedPane {
         reloadCBCustomer();
 
         updateCBDataIdCustomer();
-        cb_id_customer.setSelectedIndex(0);
     }
 
     public static void updateCBDataIdCustomer() {
