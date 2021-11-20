@@ -313,11 +313,11 @@ public class TabbedPane {
     }
 
     private static void reloadCBLeads() {
-        cb_id_leads.setModel(new DefaultComboBoxModel(showLeadsId().toArray()));
+        cb_id_leads.setModel(new DefaultComboBoxModel<>(showLeadsId().toArray()));
     }
 
     private static void reloadCBCustomer() {
-        cb_id_customer.setModel(new DefaultComboBoxModel(showCustomerId().toArray()));
+        cb_id_customer.setModel(new DefaultComboBoxModel<>(showCustomerId().toArray()));
     }
 
     public static void reloadCustomer() {
@@ -349,7 +349,9 @@ public class TabbedPane {
                             "where customer.id = " + cb_id_customer.getSelectedItem()
             );
 
-            while (res.next()) {
+            while (true) {
+                assert res != null;
+                if (!res.next()) break;
                 txt_email_customer.setText(res.getString("email"));
                 txt_hp_customer.setText(res.getString("phone"));
                 txt_address_customer.setText(res.getString("address"));
@@ -373,8 +375,7 @@ public class TabbedPane {
             st.executeUpdate(query);
             con.close();
         } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+            handleMysqlException(e);
         }
     }
 
@@ -385,10 +386,14 @@ public class TabbedPane {
             return DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/" + db_name, db_user, db_password);
         } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+            handleMysqlException(e);
         }
         return null;
+    }
+
+    public static void handleMysqlException(Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
     }
 
     public static ArrayList<String> showLeadsId() {
@@ -522,7 +527,7 @@ public class TabbedPane {
                 leadsModel.addRow(listData);
                 tableLeads.setModel(leadsModel);
             } catch (SQLException e) {
-                e.printStackTrace();
+                handleMysqlException(e);
             }
         }
     }
@@ -544,8 +549,7 @@ public class TabbedPane {
 
             return st.executeQuery(query);
         } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Mysql error", JOptionPane.ERROR_MESSAGE);
+            handleMysqlException(e);
         }
         return null;
     }
